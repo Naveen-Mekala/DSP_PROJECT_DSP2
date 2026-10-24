@@ -1,0 +1,237 @@
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-athlete}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-athlete_local_password}
+      POSTGRES_DB: ${POSTGRES_DB:-athlete_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/db_init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  db-bootstrap:
+    image: postgres:16
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-athlete}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-athlete_local_password}
+      PGDATABASE: postgres
+    volumes:
+      - ./docker/db_init:/bootstrap:ro
+    command:
+      - sh
+      - -ec
+      - >-
+        until pg_isready -h postgres -U "$$PGUSER"; do sleep 1; done;
+        psql -v ON_ERROR_STOP=1
+        -f /bootstrap/01-create-service-databases.sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    working_dir: /mlflow
+    command:
+      - sh
+      - -c
+      - >-
+        mlflow server --host 0.0.0.0 --port 5000
+        --backend-store-uri
+        postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:5432/mlflow_db
+        --default-artifact-root /mlartifacts
+        --serve-artifacts
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-athlete}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-athlete_local_password}
+    ports:
+      - "5001:5000"
+    volumes:
+      - mlflow_artifacts:/mlartifacts
+    depends_on:
+      db-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen('http://localhost:5000/health', timeout=2)
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  fastapi:
+    build: .
+    command:
+      - uvicorn
+      - api.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://athlete:athlete_local_password@postgres:5432/athlete_db}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_REGISTERED_MODEL: AthleteRecoveryModel
+      MODEL_PATH: /app/models/model.pkl.gz
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  streamlit:
+    build: .
+    command:
+      - streamlit
+      - run
+      - streamlit/Home.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+    environment:
+      API_URL: http://fastapi:8000
+      GX_CONTEXT_ROOT_DIR: /app/gx/gx
+    volumes:
+      - ./gx:/app/gx
+    ports:
+      - "8502:8501"
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    restart: unless-stopped
+
+  airflow-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    environment: &airflow-env
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete_local_password}@postgres:5432/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=}
+      AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_API_SECRET_KEY:-local-dev-secret-change-me}
+      AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_ADMIN_USER:-admin}:${AIRFLOW_ADMIN_PASSWORD:-admin}
+      AIRFLOW_CONN_POSTGRES_DEFAULT: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete_local_password}@postgres:5432/athlete_db
+      DATABASE_URL: ${DATABASE_URL:-postgresql://athlete:athlete_local_password@postgres:5432/athlete_db}
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_REGISTERED_MODEL: AthleteRecoveryModel
+      DSP_PROJECT_DIR: /opt/airflow/project
+      PYTHONPATH: /opt/airflow/project
+    volumes: &airflow-volumes
+      - ./airflow/dags:/opt/airflow/dags
+      - ./data:/opt/airflow/project/data
+      - ./scripts:/opt/airflow/project/scripts
+      - ./models:/opt/airflow/project/models
+      - ./database:/opt/airflow/project/database
+      - ./gx:/opt/airflow/project/gx
+      - ./airflow/logs:/opt/airflow/logs
+    depends_on:
+      db-bootstrap:
+        condition: service_completed_successfully
+      mlflow:
+        condition: service_healthy
+      fastapi:
+        condition: service_healthy
+    command: ["bash", "-c", "airflow db migrate"]
+    restart: "no"
+
+  airflow-apiserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    command: api-server
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    ports:
+      - "8080:8080"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/v2/monitor/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    command: scheduler
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  airflow-dag-processor:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    command: dag-processor
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      POSTGRES_USER: ${POSTGRES_USER:-athlete}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-athlete_local_password}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.28-alpine
+    ports:
+      - "8088:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./gx/gx/uncommitted/data_docs/local_site:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mlflow_artifacts:
+  grafana_data:

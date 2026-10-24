@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "name": "athlete_dataset",
+      "id": "8459ece9-e153-4952-ba0a-7efd4bfe5d66"
+    },
+    "batch_definition": {
+      "name": "athlete_batch",
+      "id": "4e2f6ace-416c-43d2-9bc4-7d955d0149e4"
+    },
+    "datasource": {
+      "name": "athlete_datasource",
+      "id": "db5c56e2-c9bb-457f-ab14-fadda75deadd"
+    }
+  },
+  "id": "ee1a77c1-3958-452b-b430-012e50dae11c",
+  "name": "athlete_validation",
+  "suite": {
+    "name": "athlete_suite",
+    "id": "84891fa7-9a9b-4f30-9450-162b7a43eb4c"
+  }
+}

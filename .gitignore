@@ -1,0 +1,48 @@
+# Secrets and local environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Generated datasets and predictions
+data/corrupted/*.csv
+data/prediction_results.csv
+data/prediction_processed*
+
+# Generated model artifacts
+models/*.pkl
+models/*.pkl.gz
+
+# Great Expectations generated files
+gx/gx/uncommitted/
+
+# Logs and generated monitoring outputs
+airflow/logs/
+mlruns/
+mlartifacts/
+.DS_Store.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+airflow/logs/
+data/raw_data/*.csv
+data/good_data/*.csv
+data/bad_data/*.csv
+data/archived_data/*.csv
+data/prediction_results.csv
+data/.prediction_processed
+models/*.pkl
+models/*.pkl.gz
+!models/model.pkl.gz
+!models/.gitkeep
+gx/gx/uncommitted/
+mlruns/
+mlartifacts/
+models/model.pkl.gz

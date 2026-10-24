@@ -1,0 +1,16 @@
+apiVersion: 1
+datasources:
+  - name: Athlete PostgreSQL
+    uid: athlete-postgres
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    user: $POSTGRES_USER
+    secureJsonData:
+      password: $POSTGRES_PASSWORD
+    jsonData:
+      database: athlete_db
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: true
