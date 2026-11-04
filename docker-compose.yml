@@ -90,6 +90,8 @@ services:
       MLFLOW_TRACKING_URI: http://mlflow:5000
       MLFLOW_REGISTERED_MODEL: AthleteRecoveryModel
       MODEL_PATH: /app/models/model.pkl.gz
+    volumes:
+      - mlflow_artifacts:/mlartifacts
     ports:
       - "8001:8000"
     depends_on:
@@ -135,7 +137,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=}
       AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_API_SECRET_KEY:-local-dev-secret-change-me}
       AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-apiserver:8080/execution/
-      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_ADMIN_USER:-admin}:${AIRFLOW_ADMIN_PASSWORD:-admin}
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: ${AIRFLOW_ADMIN_USER:-admin}:admin
       AIRFLOW_CONN_POSTGRES_DEFAULT: postgresql://${POSTGRES_USER:-athlete}:${POSTGRES_PASSWORD:-athlete_local_password}@postgres:5432/athlete_db
       DATABASE_URL: ${DATABASE_URL:-postgresql://athlete:athlete_local_password@postgres:5432/athlete_db}
       MLFLOW_TRACKING_URI: http://mlflow:5000
@@ -150,6 +152,7 @@ services:
       - ./database:/opt/airflow/project/database
       - ./gx:/opt/airflow/project/gx
       - ./airflow/logs:/opt/airflow/logs
+      - mlflow_artifacts:/mlartifacts
     depends_on:
       db-bootstrap:
         condition: service_completed_successfully
@@ -169,6 +172,10 @@ services:
     volumes: *airflow-volumes
     ports:
       - "8080:8080"
+    networks:
+      default:
+        aliases:
+          - airflow-apiserver
     depends_on:
       airflow-init:
         condition: service_completed_successfully

@@ -18,6 +18,8 @@ GOOD_DIR = PROJECT_DIR / "data/good_data"
 BAD_DIR = PROJECT_DIR / "data/bad_data"
 ARCHIVE_DIR = PROJECT_DIR / "data/archived_data"
 sys.path.insert(0, str(PROJECT_DIR))
+# Make sibling package "common" importable regardless of which Airflow process loads this DAG.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scripts.data_quality import calculate_criticality, summarize_validation_errors
 from common.gx_helpers import run_validation as run_gx_validation
 
@@ -33,6 +35,11 @@ REQUIRED_COLUMNS = [
 def row_is_invalid(row):
     try:
         if pd.isna(row.get("Athlete_ID")) or pd.isna(row.get("Age")):
+            return True
+
+        # Every required column (incl. all model features) must be present:
+        # the prediction API rejects null feature values.
+        if any(pd.isna(row.get(c)) for c in REQUIRED_COLUMNS):
             return True
 
         if not 0 <= float(row.get("Recovery_Score")) <= 100:
@@ -124,8 +131,10 @@ with DAG(
 
         invalid_mask = df.apply(row_is_invalid, axis=1)
 
-        # Duplicate Athlete IDs are also invalid.
-        invalid_mask = invalid_mask | df["Athlete_ID"].duplicated(keep=False)
+        # Duplicate records (same Athlete_ID on the same Day) are invalid.
+        # Athlete_ID alone repeats by design (one row per athlete per day).
+        # keep="first": the original row stays valid, extra copies go to bad_data.
+        invalid_mask = invalid_mask | df.duplicated(subset=["Athlete_ID", "Day"], keep="first")
 
         # Great Expectations checkpoint is the authoritative batch validation report.
         gx_result = run_gx_validation(df)

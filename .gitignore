@@ -46,3 +46,6 @@ gx/gx/uncommitted/
 mlruns/
 mlartifacts/
 models/model.pkl.gz
+
+# Local safety backups (not part of the deliverable)
+backups/
