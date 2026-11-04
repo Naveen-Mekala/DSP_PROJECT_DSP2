@@ -36,7 +36,13 @@ col3.metric("Highest Prediction", round(df["Prediction"].max(), 2))
 
 st.divider()
 st.subheader("Prediction Distribution")
-st.plotly_chart(px.histogram(df, x="Prediction", nbins=20, title="Recovery Score Distribution"), use_container_width=True)
+st.plotly_chart(
+    px.histogram(
+        df,
+        x="Prediction",
+        nbins=20,
+        title="Recovery Score Distribution"),
+    use_container_width=True)
 
 if "Sport_Type" in df.columns:
     st.subheader("Sport Type")
@@ -45,7 +51,13 @@ if "Sport_Type" in df.columns:
 if "Gender" in df.columns:
     st.subheader("Gender Distribution")
     gender_counts = df["Gender"].value_counts().rename_axis("Gender").reset_index(name="Count")
-    st.plotly_chart(px.bar(gender_counts, x="Gender", y="Count", title="Gender Count"), use_container_width=True)
+    st.plotly_chart(
+        px.bar(
+            gender_counts,
+            x="Gender",
+            y="Count",
+            title="Gender Count"),
+        use_container_width=True)
 
 st.subheader("Prediction Table")
 st.dataframe(df, use_container_width=True, hide_index=True)

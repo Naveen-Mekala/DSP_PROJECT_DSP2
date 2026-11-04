@@ -95,6 +95,316 @@
       "meta": {},
       "severity": "critical",
       "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "d6157a5d-c41c-4434-9fdc-d48d9065d7c0",
+      "kwargs": {
+        "column": "Day"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "3167110d-0fd4-4370-99c9-917a5de8abda",
+      "kwargs": {
+        "column": "Day_of_Week"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "e9b0154f-1d76-4990-8193-c2e4e82d9148",
+      "kwargs": {
+        "column": "Week"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "61464063-34c2-45e4-9439-c54903476fee",
+      "kwargs": {
+        "column": "Age"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "ea103476-070f-4b19-b5ab-0ee3895766f5",
+      "kwargs": {
+        "column": "Gender"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "84a6577c-f39f-49e3-ab7c-9239153ad95b",
+      "kwargs": {
+        "column": "Sport_Type"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "d5ce3019-4510-4c07-ae50-2916bf04dc96",
+      "kwargs": {
+        "column": "Training_Type"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "d27ee49d-e21b-4f78-af19-a62cbd2d66cb",
+      "kwargs": {
+        "column": "Training_Duration_Min"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "7871bf77-4b1e-455d-82c9-0c5024dcd4e2",
+      "kwargs": {
+        "column": "Training_Intensity"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "1259249c-a9d2-4cee-88a0-63d847240a75",
+      "kwargs": {
+        "column": "Caffeine_Intake_mg"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "29985247-86b2-4056-8d6f-1cc9cf9d4afc",
+      "kwargs": {
+        "column": "Stress_Level"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "44ba20f5-03d2-43c9-b3fc-cec7bd5a0159",
+      "kwargs": {
+        "column": "Resting_Heart_Rate"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "83d87e26-e294-4442-9b35-74d6aaf82227",
+      "kwargs": {
+        "column": "HRV_ms"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "08aa508d-d76c-4e9e-96ed-80a32171ce82",
+      "kwargs": {
+        "column": "Mood_Score"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "ace59633-08b6-4df6-aa81-cc6c8f3bfe16",
+      "kwargs": {
+        "column": "Muscle_Soreness"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "09003776-0041-4c13-ad2d-bb77a09c64df",
+      "kwargs": {
+        "column": "Energy_Level"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "016c858a-c8d3-4ea3-ada4-fc9ba2828b8f",
+      "kwargs": {
+        "column": "Recovery_Score"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "37155676-41fa-4b0e-ba5b-5bd86b949751",
+      "kwargs": {
+        "column": "Day",
+        "max_value": 366.0,
+        "min_value": 1.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "9393e907-0c3a-429b-a3d2-d7afac5a8743",
+      "kwargs": {
+        "column": "Day_of_Week",
+        "max_value": 7.0,
+        "min_value": 1.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "66a5adf4-ea80-4842-8c1c-2efde406223c",
+      "kwargs": {
+        "column": "Week",
+        "max_value": 53.0,
+        "min_value": 1.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "0ecf2421-9795-450d-a3ab-b93f3c54bfda",
+      "kwargs": {
+        "column": "Training_Intensity",
+        "max_value": 10.0,
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "45e1ba57-428d-4aa1-87dc-61e50d9985e9",
+      "kwargs": {
+        "column": "Caffeine_Intake_mg",
+        "max_value": 1000.0,
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "b4e4bf1d-ae34-4667-bf31-4463268e2740",
+      "kwargs": {
+        "column": "Resting_Heart_Rate",
+        "max_value": 220.0,
+        "min_value": 30.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "c42d5ef3-7814-4dcd-85d6-83228acccfbd",
+      "kwargs": {
+        "column": "HRV_ms",
+        "max_value": 300.0,
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "a3b05665-b75a-46b3-a299-62d3e5607770",
+      "kwargs": {
+        "column": "Muscle_Soreness",
+        "max_value": 10.0,
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "a864ba76-609d-4b24-b1bb-5d52420123e4",
+      "kwargs": {
+        "column": "Energy_Level",
+        "max_value": 10.0,
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    },
+    {
+      "id": "8887918f-7ceb-46b5-bdda-cf35aac72c8c",
+      "kwargs": {
+        "column": "Sport_Type",
+        "value_set": [
+          "Combat",
+          "Endurance",
+          "Mixed",
+          "Strength",
+          "Team Sport"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "7ebadb13-ab95-4e97-b41f-a8698bedbb02",
+      "kwargs": {
+        "column": "Training_Type",
+        "value_set": [
+          "Cardio",
+          "HIIT",
+          "Rest",
+          "Strength",
+          "Yoga"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "43360b67-0004-401b-b2b0-2c25bd5cdd30",
+      "kwargs": {
+        "column": "Stress_Level",
+        "value_set": [
+          "Low",
+          "Medium",
+          "High"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "9dd1568a-c81d-4a0f-b6f1-c21b325f2100",
+      "kwargs": {
+        "column_list": [
+          "Athlete_ID",
+          "Day"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_compound_columns_to_be_unique"
     }
   ],
   "id": "84891fa7-9a9b-4f30-9450-162b7a43eb4c",

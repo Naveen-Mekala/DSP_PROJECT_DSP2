@@ -1,0 +1,342 @@
+{
+  "expectations": [
+    {
+      "id": "3f16d2e6-4bc3-42ab-81e2-ba5eda9beb65",
+      "kwargs": {
+        "column_set": [
+          "Athlete_ID",
+          "Day",
+          "Day_of_Week",
+          "Week",
+          "Age",
+          "Gender",
+          "Sport_Type",
+          "Training_Type",
+          "Training_Duration_Min",
+          "Training_Intensity",
+          "Sleep_Duration_Hours",
+          "Caffeine_Intake_mg",
+          "Stress_Level",
+          "Resting_Heart_Rate",
+          "HRV_ms",
+          "Mood_Score",
+          "Muscle_Soreness",
+          "Energy_Level",
+          "Recovery_Score"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_table_columns_to_match_set"
+    },
+    {
+      "id": "bdffd6e5-4488-4c06-9d85-1d61b5d0e15f",
+      "kwargs": {
+        "column": "Athlete_ID",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "bc602d32-aeaf-46a9-b286-ac2948aadc32",
+      "kwargs": {
+        "column": "Day",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "b441a10d-fade-4c88-91b2-96dd2b40f1a3",
+      "kwargs": {
+        "column": "Day_of_Week",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "95505261-8211-4898-8481-4045e19f8a61",
+      "kwargs": {
+        "column": "Week",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "e761ff6f-6a9d-465a-adc9-ddfa823d7b4b",
+      "kwargs": {
+        "column": "Age",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "423fbd4e-777a-4dc2-8e80-bfdf54cf5f4e",
+      "kwargs": {
+        "column": "Training_Duration_Min",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "8f2a0c01-a9b4-461a-a16c-eb4294fa9d3b",
+      "kwargs": {
+        "column": "Training_Intensity",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "7ba3532d-e99e-4286-9ba0-342c18c0e8b4",
+      "kwargs": {
+        "column": "Sleep_Duration_Hours",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "f031d247-ad74-4a80-bace-f06d897a2ee6",
+      "kwargs": {
+        "column": "Caffeine_Intake_mg",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "9d147e15-34a5-4f28-aeb2-c5dd88e130db",
+      "kwargs": {
+        "column": "Resting_Heart_Rate",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "85fa66f1-a91d-4ce4-bea8-a2e8b9621d1c",
+      "kwargs": {
+        "column": "HRV_ms",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "4ddab5d2-4e4f-4d9a-951a-0925e1af3dd3",
+      "kwargs": {
+        "column": "Mood_Score",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "f02e6808-b287-4d28-b391-608485670afd",
+      "kwargs": {
+        "column": "Muscle_Soreness",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "bd877338-1daa-4719-9702-cae53b5d76ce",
+      "kwargs": {
+        "column": "Energy_Level",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "09075dc6-94a9-47d6-a051-53b094bfd895",
+      "kwargs": {
+        "column": "Recovery_Score",
+        "type_list": [
+          "int",
+          "float",
+          "int64",
+          "float64",
+          "int32",
+          "float32"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "ee51b1c4-be3e-4264-9ed4-231877d82fa4",
+      "kwargs": {
+        "column": "Gender",
+        "type_list": [
+          "str"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "a2d08f32-0246-45ad-b04b-7c5f4ccd2e42",
+      "kwargs": {
+        "column": "Sport_Type",
+        "type_list": [
+          "str"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "fc410557-6785-4df8-a04c-2fefdd869fb1",
+      "kwargs": {
+        "column": "Training_Type",
+        "type_list": [
+          "str"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    },
+    {
+      "id": "208de0c7-175b-43ff-b759-a08c7cf82028",
+      "kwargs": {
+        "column": "Stress_Level",
+        "type_list": [
+          "str"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_type_list"
+    }
+  ],
+  "id": "dab3510e-075f-4c1f-8e12-b008c2d9cc2b",
+  "meta": {
+    "great_expectations_version": "1.18.2"
+  },
+  "name": "athlete_schema_suite",
+  "notes": null
+}

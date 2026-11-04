@@ -29,4 +29,3 @@ assert new[COL].isna().sum() == 0, "nulls remain"
 print(f"Imputed {n_missing} values in {COL} with median {median}")
 print("Shape:", new.shape, "| other 18 columns identical | existing values unchanged")
 print("Remaining nulls:", new.isna().sum()[new.isna().sum() > 0].to_dict())
-

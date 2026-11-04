@@ -32,6 +32,24 @@ def compute_ingestion_stats(total_rows: int, invalid_rows: int) -> dict:
     }
 
 
+# The 5 data-quality error categories shown in Grafana and stored per ingested file.
+CATEGORIES = ("completeness", "validity", "consistency", "schema", "type")
+
+
+def categorize_expectation(expectation_type: str) -> str:
+    """Map a GX expectation type to one of the 5 data-quality categories."""
+    name = str(expectation_type).lower()
+    if "table_columns" in name or "column_to_exist" in name:
+        return "schema"
+    if "type" in name:
+        return "type"
+    if "not_be_null" in name:
+        return "completeness"
+    if "unique" in name:
+        return "consistency"
+    return "validity"     # ranges (be_between) and allowed categories (be_in_set)
+
+
 def summarize_validation_errors(error_counts: dict, missing_columns: int = 0) -> dict:
     """Map Great Expectations failures into the database monitoring categories."""
     summary = {
@@ -50,6 +68,10 @@ def summarize_validation_errors(error_counts: dict, missing_columns: int = 0) ->
             summary["missing_values"] += count
         elif "unique" in name:
             summary["duplicate_ids"] += count
+        elif "table_columns" in name or "column_to_exist" in name:
+            continue  # counted through the missing_columns argument
+        elif "type" in name:
+            summary["wrong_data_types"] += count
         elif "be_in_set" in name:
             summary["invalid_categories"] += count
         elif "be_between" in name:

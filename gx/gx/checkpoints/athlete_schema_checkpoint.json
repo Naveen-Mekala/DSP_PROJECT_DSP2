@@ -1,0 +1,18 @@
+{
+  "actions": [
+    {
+      "name": "update_data_docs",
+      "site_names": [],
+      "type": "update_data_docs"
+    }
+  ],
+  "id": "8bdf6b94-493e-4b36-88ab-78dfeac307f3",
+  "name": "athlete_schema_checkpoint",
+  "result_format": "COMPLETE",
+  "validation_definitions": [
+    {
+      "id": "e5a30b63-22f8-4621-85ce-8902e3e54325",
+      "name": "athlete_schema_validation"
+    }
+  ]
+}

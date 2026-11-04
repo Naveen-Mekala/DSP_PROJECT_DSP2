@@ -29,7 +29,9 @@ if uploaded_file is not None:
             else:
                 # Strip labels/identifiers; the API receives data, never a local file path.
                 features_df = input_df.drop(columns=["Recovery_Score", "Athlete_ID"], errors="ignore")
-                records = features_df.astype(object).where(pd.notna(features_df), None).to_dict(orient="records")
+                records = features_df.astype(object).where(
+                    pd.notna(features_df), None).to_dict(
+                    orient="records")
                 with st.spinner("Requesting predictions from FastAPI..."):
                     response = requests.post(
                         f"{api_url}/predict",
@@ -49,7 +51,9 @@ if uploaded_file is not None:
                     } for item in results])
                     st.success(f"Predicted {len(result_df)} rows")
                     st.dataframe(result_df, use_container_width=True, hide_index=True)
-                    st.download_button("Download predictions CSV", result_df.to_csv(index=False), "batch_predictions.csv", "text/csv")
+                    st.download_button(
+                        "Download predictions CSV", result_df.to_csv(
+                            index=False), "batch_predictions.csv", "text/csv")
     except (pd.errors.ParserError, UnicodeDecodeError) as exc:
         st.error(f"The uploaded file is not a readable CSV: {exc}")
     except requests.RequestException as exc:

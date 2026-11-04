@@ -117,6 +117,7 @@ services:
     environment:
       API_URL: http://fastapi:8000
       GX_CONTEXT_ROOT_DIR: /app/gx/gx
+      DATA_DOCS_BASE_URL: ${DATA_DOCS_BASE_URL:-http://localhost:8088}
     volumes:
       - ./gx:/app/gx
     ports:
@@ -144,6 +145,17 @@ services:
       MLFLOW_REGISTERED_MODEL: AthleteRecoveryModel
       DSP_PROJECT_DIR: /opt/airflow/project
       PYTHONPATH: /opt/airflow/project
+      MODEL_SERVICE_URL: http://fastapi:8000
+      # Links put in alerts must open on the host machine (nginx / MLflow published ports).
+      DATA_DOCS_BASE_URL: ${DATA_DOCS_BASE_URL:-http://localhost:8088}
+      MLFLOW_UI_URL: ${MLFLOW_UI_URL:-http://localhost:5001}
+      TEAMS_DATA_WEBHOOK_URL: ${TEAMS_DATA_WEBHOOK_URL:-}
+      TEAMS_ML_WEBHOOK_URL: ${TEAMS_ML_WEBHOOK_URL:-}
+      INGESTION_SCHEDULE: ${INGESTION_SCHEDULE:-*/5 * * * *}
+      PREDICTION_SCHEDULE: ${PREDICTION_SCHEDULE:-*/5 * * * *}
+      TRAINING_SCHEDULE: ${TRAINING_SCHEDULE:-0 * * * *}
+      MIN_NEW_TRAINING_ROWS: ${MIN_NEW_TRAINING_ROWS:-100}
+      MAX_INFERENCE_MS_PER_ROW: ${MAX_INFERENCE_MS_PER_ROW:-10}
     volumes: &airflow-volumes
       - ./airflow/dags:/opt/airflow/dags
       - ./data:/opt/airflow/project/data
@@ -198,6 +210,18 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  airflow-triggerer:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    command: triggerer
+    environment: *airflow-env
+    volumes: *airflow-volumes
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   airflow-dag-processor:
     build:
       context: .
@@ -220,6 +244,9 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       POSTGRES_USER: ${POSTGRES_USER:-athlete}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-athlete_local_password}
+      # Placeholders keep Grafana's Teams contact points valid until real webhooks are set in .env
+      TEAMS_DATA_WEBHOOK_URL: ${TEAMS_DATA_WEBHOOK_URL:-https://example.invalid/teams-data-webhook}
+      TEAMS_ML_WEBHOOK_URL: ${TEAMS_ML_WEBHOOK_URL:-https://example.invalid/teams-ml-webhook}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro

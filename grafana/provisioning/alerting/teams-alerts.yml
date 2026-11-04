@@ -1,0 +1,162 @@
+# Grafana alerting -> Microsoft Teams (both channels).
+# Webhook URLs come from the environment (see .env.example); without them Grafana still starts
+# and the alerts are visible in Grafana (Alerting > Alert rules), they just cannot be delivered.
+# Note: provisioning expands $VARIABLES, so the SQL below uses now() - interval, not $__ macros.
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: Teams - Data alerts
+    receivers:
+      - uid: teams-data-alerts
+        type: teams
+        settings:
+          url: ${TEAMS_DATA_WEBHOOK_URL}
+          title: "[DATA] {{ .CommonLabels.alertname }}"
+  - orgId: 1
+    name: Teams - ML alerts
+    receivers:
+      - uid: teams-ml-alerts
+        type: teams
+        settings:
+          url: ${TEAMS_ML_WEBHOOK_URL}
+          title: "[ML] {{ .CommonLabels.alertname }}"
+
+groups:
+  - orgId: 1
+    name: Data quality
+    folder: DSP Monitoring
+    interval: 1m
+    rules:
+      - uid: dq-invalid-rate
+        title: High share of invalid rows
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: {channel: data}
+        annotations:
+          summary: More than 30% of the rows ingested in the last 15 minutes failed validation.
+          dashboard: http://localhost:3000/d/athlete-data-quality
+        notification_settings: {receiver: Teams - Data alerts}
+        data:
+          - refId: A
+            datasourceUid: athlete-postgres
+            relativeTimeRange: {from: 900, to: 0}
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              editorMode: code
+              rawSql: |
+                SELECT COALESCE(100.0 * sum(invalid_rows) / NULLIF(sum(total_rows), 0), 0) AS value
+                FROM ingestion_stats WHERE ingestion_time > now() - interval '15 minutes'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{evaluator: {type: gt, params: [30]}}]
+
+      - uid: dq-high-criticality
+        title: High-criticality file ingested
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: {channel: data}
+        annotations:
+          summary: A file with High criticality (missing column or >50% invalid rows) arrived in the last 10 minutes.
+          dashboard: http://localhost:3000/d/athlete-data-quality
+        notification_settings: {receiver: Teams - Data alerts}
+        data:
+          - refId: A
+            datasourceUid: athlete-postgres
+            relativeTimeRange: {from: 600, to: 0}
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              editorMode: code
+              rawSql: |
+                SELECT count(*) AS value FROM ingestion_stats
+                WHERE criticality = 'High' AND ingestion_time > now() - interval '10 minutes'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{evaluator: {type: gt, params: [0]}}]
+
+  - orgId: 1
+    name: Model monitoring
+    folder: DSP Monitoring
+    interval: 1m
+    rules:
+      - uid: ml-feature-drift
+        title: Feature drift detected
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: {channel: ml}
+        annotations:
+          summary: At least one feature has PSI >= 0.2 between the champion's training data and recent serving data.
+          dashboard: http://localhost:3000/d/athlete-model-monitoring
+        notification_settings: {receiver: Teams - ML alerts}
+        data:
+          - refId: A
+            datasourceUid: athlete-postgres
+            relativeTimeRange: {from: 1800, to: 0}
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              editorMode: code
+              rawSql: |
+                SELECT count(*) AS value FROM drift_stats
+                WHERE is_drifted = 1 AND measured_at > now() - interval '30 minutes'
+                  AND measured_at = (SELECT max(measured_at) FROM drift_stats)
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{evaluator: {type: gt, params: [0]}}]
+
+      - uid: ml-prediction-shift
+        title: Prediction behaviour changed
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: {channel: ml}
+        annotations:
+          summary: The average predicted recovery score of the last hour differs by more than 15 points from the previous 7 days.
+          dashboard: http://localhost:3000/d/athlete-model-monitoring
+        notification_settings: {receiver: Teams - ML alerts}
+        data:
+          - refId: A
+            datasourceUid: athlete-postgres
+            relativeTimeRange: {from: 3600, to: 0}
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              editorMode: code
+              rawSql: |
+                SELECT COALESCE(abs(
+                  (SELECT avg("Prediction") FROM predictions WHERE prediction_time > now() - interval '1 hour')
+                  - (SELECT avg("Prediction") FROM predictions
+                     WHERE prediction_time <= now() - interval '1 hour' AND prediction_time > now() - interval '7 days')
+                ), 0) AS value
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{evaluator: {type: gt, params: [15]}}]

@@ -23,7 +23,11 @@ if submitted:
         try:
             response = requests.get(
                 f"{api_url}/past-predictions",
-                params={"start_date": start_date.isoformat(), "end_date": end_date.isoformat(), "source": source, "limit": int(limit)},
+                params={
+                    "start_date": start_date.isoformat(),
+                    "end_date": end_date.isoformat(),
+                    "source": source,
+                    "limit": int(limit)},
                 timeout=15,
             )
             response.raise_for_status()
@@ -34,7 +38,12 @@ if submitted:
                 df = pd.DataFrame(data)
                 st.metric("Predictions returned", len(df))
                 st.dataframe(df, use_container_width=True, hide_index=True)
-                st.download_button("Download results CSV", df.to_csv(index=False), "past_predictions.csv", "text/csv")
+                st.download_button(
+                    "Download results CSV",
+                    df.to_csv(
+                        index=False),
+                    "past_predictions.csv",
+                    "text/csv")
         except requests.RequestException as exc:
             st.error(f"Could not retrieve predictions from the API: {exc}")
         except (ValueError, TypeError) as exc:

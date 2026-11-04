@@ -1,5 +1,5 @@
 from database.database import Base, engine
-import database.models
+import database.models  # noqa: F401  (registers the tables on Base)
 
 print("Creating database tables...")
 

@@ -9,18 +9,32 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.drift_math import psi
-from database.database import SessionLocal
-from database.models import DriftStats, Prediction, TrainingStats
+from scripts.drift_math import psi  # noqa: E402
+from database.database import SessionLocal  # noqa: E402
+from database.models import DriftStats, Prediction, TrainingStats  # noqa: E402
 
 THRESHOLD = float(os.getenv("DRIFT_PSI_THRESHOLD", "0.2"))
 WINDOW = int(os.getenv("DRIFT_WINDOW", "500"))
 
 
+def _champion_version():
+    try:
+        from scripts.training_pipeline import get_champion
+        champion = get_champion()
+        return str(champion.version) if champion else None
+    except Exception:
+        return None
+
+
 def main():
     db = SessionLocal()
     try:
-        train_rows = db.query(TrainingStats).order_by(TrainingStats.training_time.desc()).all()
+        # Baseline = training statistics of the model currently in production (@champion).
+        champion_version = _champion_version()
+        query = db.query(TrainingStats)
+        if champion_version and query.filter(TrainingStats.model_version == champion_version).count():
+            query = query.filter(TrainingStats.model_version == champion_version)
+        train_rows = query.order_by(TrainingStats.training_time.desc()).all()
         latest = {}
         for row in train_rows:
             latest.setdefault(row.feature_name, row)
@@ -29,7 +43,7 @@ def main():
             print("Drift calculation skipped: training stats or serving predictions are missing.")
             return
         versions = [r.model_version for r in latest.values() if r.model_version]
-        version = versions[0] if versions else "unknown"
+        version = champion_version or (versions[0] if versions else "unknown")
         serving = [r.input_features or {} for r in predictions]
         for feature, baseline in latest.items():
             values = [r.get(feature) for r in serving if r.get(feature) is not None]
@@ -43,7 +57,9 @@ def main():
                 if lo == hi:
                     lo, hi = lo - 0.5, hi + 0.5
                 edges = np.linspace(lo, hi, 11)
-                train_counts = np.asarray((baseline.distribution_json or {}).get("histogram_counts", [1] * 10), dtype=float)
+                train_counts = np.asarray(
+                    (baseline.distribution_json or {}).get(
+                        "histogram_counts", [1] * 10), dtype=float)
                 if len(train_counts) != 10:
                     train_counts = np.ones(10)
                 serve_counts, _ = np.histogram(nums, bins=edges)
@@ -55,8 +71,10 @@ def main():
                 expected = baseline.distribution_json or {}
                 observed = Counter(str(v) for v in values)
                 keys = set(expected) | set(observed)
-                score = psi([expected.get(k, 0.0) for k in keys], [observed.get(k, 0) for k in keys]) if keys else 0.0
-            db.add(DriftStats(model_version=version, feature_name=feature, metric_name="psi",
+                score = psi([expected.get(k, 0.0) for k in keys], [observed.get(k, 0)
+                            for k in keys]) if keys else 0.0
+            metric = "psi_numeric" if baseline.feature_type == "numeric" else "psi_categorical"
+            db.add(DriftStats(model_version=version, feature_name=feature, metric_name=metric,
                               metric_value=score, threshold=THRESHOLD, is_drifted=int(score >= THRESHOLD),
                               details=json.dumps({"serving_rows": len(values), "baseline_type": baseline.feature_type})))
         db.commit()

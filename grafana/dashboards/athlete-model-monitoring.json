@@ -1,0 +1,797 @@
+{
+  "uid": "athlete-model-monitoring",
+  "title": "Athlete Recovery — Model Monitoring",
+  "tags": [
+    "dsp",
+    "model",
+    "drift"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Predictions",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT count(*) AS value FROM predictions WHERE $__timeFilter(prediction_time)",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": null,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Model in production",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT 'v' || model_version AS value FROM predictions ORDER BY prediction_time DESC LIMIT 1",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "string",
+          "decimals": null,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^value$/",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Average predicted recovery score",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT COALESCE(avg(\"Prediction\"), 0) AS value FROM predictions WHERE $__timeFilter(prediction_time)",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": null,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Drifted features (latest check)",
+      "description": "",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT count(*) AS value FROM drift_stats WHERE is_drifted = 1 AND measured_at = (SELECT max(measured_at) FROM drift_stats)",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": null,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Predictions over time",
+      "description": "scheduled = Airflow prediction job; webapp = Streamlit / API users.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(prediction_time, $__interval), source AS metric, count(*) AS value FROM predictions WHERE $__timeFilter(prediction_time) GROUP BY 1, 2 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 2,
+            "fillOpacity": 70,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "spanNulls": true
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scheduled"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "webapp"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Predicted recovery score over time",
+      "description": "A sudden change in the average prediction is an early sign of a model or data issue.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(prediction_time, $__interval), avg(\"Prediction\") AS \"Average\", min(\"Prediction\") AS \"Min\", max(\"Prediction\") AS \"Max\" FROM predictions WHERE $__timeFilter(prediction_time) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Average"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Min"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-blue"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "barchart",
+      "title": "Distribution of predictions",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "description": "Predicted recovery scores in the selected time range, grouped in buckets of 10.",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT lpad((LEAST(floor(\"Prediction\" / 10), 9) * 10)::int::text, 3, ' ') || '–' || ((LEAST(floor(\"Prediction\" / 10), 9) + 1) * 10)::int AS \"Score\", count(*) AS \"Predictions\" FROM predictions WHERE $__timeFilter(prediction_time) GROUP BY 1 ORDER BY 1",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xField": "Score",
+        "orientation": "vertical",
+        "showValue": "auto",
+        "legend": {
+          "showLegend": false
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Numeric feature drift (PSI, training vs serving)",
+      "description": "Population Stability Index between the champion's training data and recent serving inputs. Above 0.2 = significant drift.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT measured_at AS time, feature_name AS metric, metric_value AS value FROM drift_stats WHERE $__timeFilter(measured_at) AND metric_name IN ('psi', 'psi_numeric') ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true,
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Categorical feature drift (PSI, training vs serving)",
+      "description": "Same PSI test for Gender, Sport_Type, Training_Type and Stress_Level.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "SELECT measured_at AS time, feature_name AS metric, metric_value AS value FROM drift_stats WHERE $__timeFilter(measured_at) AND metric_name = 'psi_categorical' ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 6,
+            "showPoints": "auto",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "spanNulls": true,
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Training vs serving — numeric features",
+      "description": "Mean of each feature in the champion's training data vs. in served predictions.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "WITH t AS (SELECT DISTINCT ON (feature_name) feature_name, mean_value, std_value FROM training_stats WHERE feature_type = 'numeric' AND model_version = COALESCE( (SELECT model_version FROM predictions WHERE model_version ~ '^[0-9]+$' ORDER BY prediction_time DESC LIMIT 1), (SELECT model_version FROM training_stats ORDER BY training_time DESC LIMIT 1)) ORDER BY feature_name, training_time DESC), s AS (SELECT t.feature_name, avg(NULLIF(p.input_features ->> t.feature_name, '')::float) AS m FROM t CROSS JOIN predictions p WHERE $__timeFilter(p.prediction_time) GROUP BY t.feature_name) SELECT t.feature_name AS \"Feature\", round(t.mean_value::numeric, 2) AS \"Training mean\", round(s.m::numeric, 2) AS \"Serving mean\", round((100 * (s.m - t.mean_value) / NULLIF(t.mean_value, 0))::numeric, 1) AS \"Shift %\" FROM t JOIN s USING (feature_name) ORDER BY abs((s.m - t.mean_value) / NULLIF(t.mean_value, 0)) DESC",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Shift %"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 10
+                    },
+                    {
+                      "color": "red",
+                      "value": 25
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Training vs serving — categories",
+      "description": "Share of each category in training data vs. in served predictions.",
+      "datasource": {
+        "type": "postgres",
+        "uid": "athlete-postgres"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "athlete-postgres"
+          },
+          "rawSql": "WITH t AS (SELECT DISTINCT ON (feature_name) feature_name, distribution_json FROM training_stats WHERE feature_type = 'categorical' AND model_version = COALESCE( (SELECT model_version FROM predictions WHERE model_version ~ '^[0-9]+$' ORDER BY prediction_time DESC LIMIT 1), (SELECT model_version FROM training_stats ORDER BY training_time DESC LIMIT 1)) ORDER BY feature_name, training_time DESC), tc AS (SELECT t.feature_name, d.key AS category, d.value::float AS share FROM t, json_each_text(t.distribution_json) d), s AS (SELECT tc.feature_name, tc.category, avg(CASE WHEN p.input_features ->> tc.feature_name = tc.category THEN 1.0 ELSE 0 END) AS share FROM tc CROSS JOIN predictions p WHERE $__timeFilter(p.prediction_time) GROUP BY 1, 2) SELECT tc.feature_name AS \"Feature\", tc.category AS \"Category\", round((100 * tc.share)::numeric, 1) AS \"Training %\", round((100 * s.share)::numeric, 1) AS \"Serving %\", round((100 * (s.share - tc.share))::numeric, 1) AS \"Difference (pts)\" FROM tc JOIN s USING (feature_name, category) ORDER BY 1, 2",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      }
+    }
+  ]
+}

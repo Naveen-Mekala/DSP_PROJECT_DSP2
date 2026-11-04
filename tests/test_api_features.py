@@ -1,5 +1,4 @@
 """Regression tests for consistent training/serving feature preparation."""
-import pandas as pd
 import pytest
 
 from api.features import FEATURE_COLUMNS, feature_frame

@@ -8,6 +8,8 @@ FEATURE_COLUMNS = [
     "Stress_Level", "Resting_Heart_Rate", "HRV_ms", "Mood_Score",
     "Muscle_Soreness", "Energy_Level",
 ]
+CATEGORICAL_FEATURES = ["Gender", "Sport_Type", "Training_Type", "Stress_Level"]
+NUMERIC_FEATURES = [c for c in FEATURE_COLUMNS if c not in CATEGORICAL_FEATURES]
 
 
 def feature_frame(records):
@@ -23,4 +25,7 @@ def feature_frame(records):
     missing = [column for column in FEATURE_COLUMNS if column not in df.columns]
     if missing:
         raise HTTPException(status_code=422, detail=f"Missing required feature columns: {missing}")
+    # Same dtypes as training (numeric features as float64), required by the MLflow model signature.
+    for column in NUMERIC_FEATURES:
+        df[column] = pd.to_numeric(df[column], errors="coerce").astype("float64")
     return df
