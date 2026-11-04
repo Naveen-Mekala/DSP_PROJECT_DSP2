@@ -12,7 +12,7 @@ class Prediction(Base):
     Sport_Type = Column(String)
     Training_Type = Column(String)
     Training_Duration_Min = Column(Float)
-    Training_Intensity = Column(Integer)
+    Training_Intensity = Column(Float)
     Sleep_Duration_Hours = Column(Float)
     Caffeine_Intake_mg = Column(Float)
     Stress_Level = Column(String)

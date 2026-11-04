@@ -124,3 +124,26 @@ flake8 api database scripts tests airflow/dags streamlit validation --count --sh
 ```
 
 The tests cover criticality thresholds, valid/invalid row splitting, ingestion statistics, Pydantic input validation, and PSI behavior. Integration tests should also be run with Docker before the defense.
+
+## Data quality decisions
+
+- **Imputation:** the clean dataset had 604 missing `Sleep_Duration_Hours`; they were imputed with the median (7.5 h) by `scripts/impute_sleep_median.py`. Only that column changed (verified programmatically). The file was re-serialized by pandas (LF line endings, `7` → `7.0`), which is why Git shows a full-file diff.
+- **Training_Intensity:** 1 missing value left untouched on purpose; ingestion routes that row to `bad_data`, and training handles it with `SimpleImputer`.
+- **Invalid-row rules (ingestion):** Great Expectations checkpoint (9 expectations) + row-level range/category rules + any null in a required column + duplicates on (`Athlete_ID`, `Day`) keeping the first occurrence. `Athlete_ID` alone repeats by design (one row per athlete per day).
+- **Results:** clean dataset 9/9 expectations (100%); corrupted dataset 3/9 (expected). Ingesting the corrupted file: 8,389 rows → 7,669 good / 720 bad (8.58%, criticality Low).
+
+## Known limitations
+
+- GX returns at most 20 unexpected row indices per expectation (`partial_unexpected_index_list`); the row-level rules in `ingestion_dag.py` compensate. Setting the checkpoint `result_format` to `COMPLETE` would remove this cap.
+- `validation/run_validation.py` predates the DataFrameAsset migration; use `airflow/dags/common/gx_helpers.run_validation(df)`.
+- The prediction DAG sends all new rows in one request, so a single invalid row would fail the batch (prevented upstream by the ingestion null check).
+- Teams alerts are printed to the task log (webhook placeholder).
+
+## Resetting demo data
+
+```bash
+# Full file (one ingestion run)
+cp data/corrupted/athlete_recovery_corrupted.csv data/raw_data/
+# Or realistic streaming: 10-row batches picked up every minute by the ingestion DAG
+python scripts/split_dataset.py
+```
