@@ -146,6 +146,8 @@ services:
       DSP_PROJECT_DIR: /opt/airflow/project
       PYTHONPATH: /opt/airflow/project
       MODEL_SERVICE_URL: http://fastapi:8000
+      AIRFLOW_ADMIN_USER: ${AIRFLOW_ADMIN_USER:-admin}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-admin}
       # Links put in alerts must open on the host machine (nginx / MLflow published ports).
       DATA_DOCS_BASE_URL: ${DATA_DOCS_BASE_URL:-http://localhost:8088}
       MLFLOW_UI_URL: ${MLFLOW_UI_URL:-http://localhost:5001}
@@ -179,7 +181,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.airflow
-    command: api-server
+    command:
+      - bash
+      - -c
+      - >-
+        python -c "import json, os; json.dump({os.environ['AIRFLOW_ADMIN_USER']: os.environ['AIRFLOW_ADMIN_PASSWORD']},
+        open('/opt/airflow/simple_auth_manager_passwords.json.generated', 'w'))"
+        && exec airflow api-server
     environment: *airflow-env
     volumes: *airflow-volumes
     ports:
